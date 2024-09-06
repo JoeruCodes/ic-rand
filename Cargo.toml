@@ -3,6 +3,10 @@ name = "ic-rand"
 version = "0.1.0"
 edition = "2021"
 
+
+description = "simple random number generator for icp"
+license = "MIT"
+
 [dependencies]
 candid = "0.10.10"
 futures = "0.3.30"
