@@ -24,7 +24,13 @@ pub mod true_rng{
 pub mod rng{
     use std::ops::Rem;
     use num_traits::{PrimInt, WrappingAdd, WrappingMul};
-    
+    pub fn random_seed() -> usize {
+        // Use a combination of memory addresses, loop counters, or simple operations to generate variability
+        let x = 42usize;
+        let y = &x as *const usize as usize;  // Use the memory address of `x` as a factor
+        let z = (y ^ 0xdeadbeef) + (y >> 3); // Apply some bitwise operations for variability
+        z
+    }
     pub struct RandomNumberGenerator<T>
     where
         T: PrimInt + WrappingAdd + WrappingMul + Rem<Output = T>,
@@ -45,13 +51,13 @@ pub mod rng{
         }
     
         /// Creates a new `RandomNumberGenerator` with default values for `a`, `c`, and `m`.
-        pub fn new(seed: T) -> Self {
+        pub fn new() -> Self {
             // Default values for `a`, `c`, and `m` are based on typical LCG parameters for 32-bit numbers.
             let a = T::from(1664525).unwrap();
             let c = T::from(1013904223).unwrap();
             let m = T::from(2u64.pow(32)).unwrap(); // Use `u64` here since `T` could be larger than `u32`.
     
-            RandomNumberGenerator { seed, a, c, m }
+            RandomNumberGenerator { seed: T::from(random_seed()).unwrap(), a, c, m }
         }
     
         /// Generates the next random number in the sequence.
