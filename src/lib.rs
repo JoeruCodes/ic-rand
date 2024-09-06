@@ -1,8 +1,8 @@
-use rng::RandomNumberGenerator;
+
 
 pub mod true_rng{
     use candid::Principal;
-    use ic_cdk::{call, spawn};
+    use ic_cdk::call;
 
     pub async fn async_generate() -> Result<usize, String >{
         let (random_bytes,): (Vec<u8>,) = call(Principal::management_canister(), "raw_rand", ()).await.map_err(|err| format!("{:?}", err))?;
