@@ -25,10 +25,9 @@ pub mod rng{
     use std::ops::Rem;
     use num_traits::{PrimInt, WrappingAdd, WrappingMul};
     pub fn random_seed() -> usize {
-        // Use a combination of memory addresses, loop counters, or simple operations to generate variability
         let x = 42usize;
-        let y = &x as *const usize as usize;  // Use the memory address of `x` as a factor
-        let z = (y ^ 0xdeadbeef) + (y >> 3); // Apply some bitwise operations for variability
+        let y = &x as *const usize as usize; 
+        let z = (y ^ 0xdeadbeef) + (y >> 3);
         z
     }
     pub struct RandomNumberGenerator<T>
