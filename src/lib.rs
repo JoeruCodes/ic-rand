@@ -4,10 +4,17 @@ pub mod true_rng{
     use candid::Principal;
     use ic_cdk::call;
 
-    pub async fn async_generate() -> Result<usize, String >{
+    pub async fn async_generate() -> Result<usize, String> {
         let (random_bytes,): (Vec<u8>,) = call(Principal::management_canister(), "raw_rand", ()).await.map_err(|err| format!("{:?}", err))?;
         
-        let random_number = usize::from_be_bytes(random_bytes[0..4.min(random_bytes.len())].try_into().unwrap());
+        // Determine the size of `usize` and pad the bytes accordingly
+        const USIZE_SIZE: usize = std::mem::size_of::<usize>();
+        let mut padded_bytes = [0u8; std::mem::size_of::<usize>()];
+        
+        let len = random_bytes.len().min(USIZE_SIZE);
+        padded_bytes[USIZE_SIZE - len..USIZE_SIZE].copy_from_slice(&random_bytes[0..len]);
+        
+        let random_number = usize::from_be_bytes(padded_bytes);
     
         Ok(random_number)
     }
