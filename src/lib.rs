@@ -29,6 +29,7 @@ pub mod true_rng{
 }
 
 pub mod rng{
+    use std::hash::{DefaultHasher, Hash, Hasher};
     use std::ops::{Add, Mul, Rem};
     use std::num::Wrapping;
     use num_traits::{PrimInt, FromPrimitive, Unsigned, Bounded};
@@ -36,8 +37,26 @@ pub mod rng{
     pub fn random_seed() -> usize {
         let x = 42usize;
         let y = &x as *const usize as usize;
-        let z = (y ^ 0xdeadbeef) + (y >> 3);
-        z
+        let stack_value = &x as *const usize as usize;
+        let stack_value2 = &y as *const usize as usize;
+        
+        // Combine memory address and hash
+        let mut hasher = DefaultHasher::new();
+        stack_value.hash(&mut hasher);
+        stack_value2.hash(&mut hasher);
+        ic_cdk::api::time().hash(&mut hasher);
+        let hash = hasher.finish() as usize;
+        
+        // Use smaller constants and valid shifts
+        let mut seed = y ^ (hash << 7) ^ (stack_value >> 3);
+        seed = seed.wrapping_add(0x9e3779b9); // Golden ratio constant
+        seed = seed ^ (seed >> 31); // Use shift within range
+        seed = seed.wrapping_mul(0x85ebca6b); // Smaller multiplier
+        seed = seed ^ (seed >> 31); // Use shift within range
+        seed = seed.wrapping_mul(0xc2b2ae35); // Smaller multiplier
+        seed = seed ^ (seed >> 31); // Use shift within range
+    
+        seed
     }
     
     pub struct RandomNumberGenerator<T>
